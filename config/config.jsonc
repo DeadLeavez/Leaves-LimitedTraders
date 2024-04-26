@@ -1,0 +1,64 @@
+{
+    "timeBetweenUpdates": 115, //How often to re-shuffle their inventory. Should be run more often than traders reset.
+    "tradersToLimit":  //remove or add traders you want to have adjusted. Probably works for modded traders, but havent tried.
+    [
+        "5a7c2eca46aef81a7ca2145d", //Mechanic
+        "5ac3b934156ae10c4430e83c", //Ragman
+        "5c0647fdd443bc2504c2d371", //Jaeger
+        "54cb50c76803fa8b248b4571", //Prapor
+        "54cb57776803fa99248b456e", //Therapist
+        "5935c25fb3acc3127c3d8cd9", //Peacekeeper
+        "58330581ace78e27b8b10cee"  //Skier
+    ],
+    "categories": //Check https://hub.sp-tarkov.com/doc/entry/43-traders-currencies-and-handbook-ids/ for category IDs or https://db.sp-tarkov.com/
+    {
+        "5485a8684bdc2da71d8b4567": //Ammo
+        { 
+            "base": 500, //The base count of an item. In this case 300.
+            "random": 100, //The variance of the base count. With this being 200, and Base being 300. The total spread is 100-500, or 300+/-200
+            "chanceForNoStock": 0.5 //Chance for there to be none of an item available. Rolled for eached individual item.
+        },
+        "543be6564bdc2df4348b4568": //Throw weapon (Grenades)
+        {
+            "base": 7,
+            "random": 4,
+            "chanceForNoStock": 0.2
+        },
+        "543be5dd4bdc2deb348b4569":  //Money
+        {
+            "base": 3000,
+            "random": 1500,
+            "chanceForNoStock": 0
+        },
+        "5447e0e74bdc2d3c308b4567": //Special items (markers, cameras, etc)
+        {
+            "base": 100,
+            "random": 0,
+            "chanceForNoStock": 0
+        },
+        "5448bc234bdc2d3c308b4569": //Magazines (for weapons)
+        {
+            "base": 4,
+            "random": 3,
+            "chanceForNoStock": 0.2
+        }
+    },
+
+    //If an item isnt under a specified category above. It will use the settings below.
+    "defaultBase": 5,
+    "defaultRandom": 2,
+    "defaultChanceForNoStock": 0.1,
+
+    //Remove max buy count?`
+    "removeMaxBuyRestrictions": true,
+    
+    "loyaltyMixup": false, //Alllow items to rarely drop down an item category.
+    "loyaltyMixupChance2": 0.03,   //Roll 1 to drop down 1 category
+    "loyaltyMixupChance3": 0.03,   //Roll 2 to drop down 1 category
+    "loyaltyMixupChance4": 0.03    //Roll 3 to drop down 1 category.
+    //each roll is made individually and compound.
+    //This means the odds of dropping down tiers are: (if the math is wrong, sue me. IDGAF)
+    //1 tier:   8.7%
+    //2 tiers:  0.27%
+    //3 tiers:  0.0027% 
+}
