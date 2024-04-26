@@ -229,10 +229,14 @@ async function loadPackageJson(currentDir) {
 async function loadRedirectJson() {
     const JsonPath = "../redirect.json";
 
-    // Read the contents of the package.json file asynchronously as a UTF-8 string.
-    const JsonContent = await fs.promises.readFile(JsonPath, "utf-8");
+    if (await fs.exists(JsonPath))
+    {
+        // Read the contents of the package.json file asynchronously as a UTF-8 string.
+        const JsonContent = await fs.promises.readFile(JsonPath, "utf-8");
+        return JSON.parse(JsonContent);
+    }
 
-    return JSON.parse(JsonContent);
+    return { redirs: [] };
 }
 
 
