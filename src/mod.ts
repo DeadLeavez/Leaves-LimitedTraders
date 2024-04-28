@@ -10,6 +10,8 @@ import { jsonc } from "jsonc";
 import * as path from "path";
 import { LogTextColor } from "@spt-aki/models/spt/logging/LogTextColor";
 import { Item } from "@spt-aki/models/eft/common/tables/IItem";
+import { ITemplateItem } from "@spt-aki/models/eft/common/tables/ITemplateItem";
+import { IBarterScheme, ITraderAssort } from "@spt-aki/models/eft/common/tables/ITrader";
 
 class LimitedTraders implements IPostDBLoadMod, IPreAkiLoadMod
 {
@@ -20,13 +22,19 @@ class LimitedTraders implements IPostDBLoadMod, IPreAkiLoadMod
     private config: Config;
     private vfs: VFS;
 
+    private static moneyIDs =
+        [
+            "5449016a4bdc2d6f028b456f",
+            "569668774bdc2da2298b4568",
+            "5696686a4bdc2da3298b456a"
+        ];
 
     //Trader update
     private setUpCompleted: boolean;
     private tradersToUpdate: string[];
     private tradersLastUpdate: number[];
 
-    private updateTraders ( timeSinceLastRun: number, logger: ILogger ): boolean
+    private updateTraders( timeSinceLastRun: number, logger: ILogger ): boolean
     {
         if ( timeSinceLastRun > 30 )
         {
@@ -52,14 +60,14 @@ class LimitedTraders implements IPostDBLoadMod, IPreAkiLoadMod
         return false;
     }
 
-    private getTimeNow ()
+    private getTimeNow()
     {
         const time: Date = new Date();
         const unixNow = time.valueOf();
         return Math.round( unixNow / 1000 );
     }
 
-    public preAkiLoad ( container: DependencyContainer ): void
+    public preAkiLoad( container: DependencyContainer ): void
     {
 
         this.vfs = container.resolve<VFS>( "VFS" );
@@ -81,7 +89,7 @@ class LimitedTraders implements IPostDBLoadMod, IPreAkiLoadMod
         )
     }
 
-    public postDBLoad ( container: DependencyContainer ): void 
+    public postDBLoad( container: DependencyContainer ): void 
     {
         // Get tables from database
         let tables = this.db.getTables();
@@ -110,7 +118,7 @@ class LimitedTraders implements IPostDBLoadMod, IPreAkiLoadMod
         this.setUpCompleted = true;
     }
 
-    private modifyTrader ( traderID: string ): void
+    private modifyTrader( traderID: string ): void
     {
         const itemDB = this.db.getTables().templates.items;
         const traders = this.db.getTables().traders;
@@ -148,6 +156,7 @@ class LimitedTraders implements IPostDBLoadMod, IPreAkiLoadMod
 
             //Check config categories
             count = this.getCount( itemDB, item );
+            this.adjustPrice( itemDB, item, traders[ traderID ].assort.barter_scheme[ item._id ], traders[ traderID ].assort );
 
             item.upd.StackObjectsCount = count;
 
@@ -177,8 +186,41 @@ class LimitedTraders implements IPostDBLoadMod, IPreAkiLoadMod
             }
         }
     }
+    private adjustPrice( itemDB: any, item: Item, scheme: IBarterScheme[][], assort: ITraderAssort )
+    {
+        const parent = itemDB[ item._tpl ]._parent;
+        if ( !this.config.categories[ parent ] || !this.config.categories[ parent ].priceAdjustment )
+        {
+            return;
+        }
 
-    private loyaltyMixup ( traders: any, traderID: string, item: Item )
+        if ( this.isMoneyTrade( assort, item ) )
+        {
+            const priceAdjustment = this.config.categories[ parent ].priceAdjustment;
+            scheme[ 0 ][ 0 ].count *= priceAdjustment;
+        }
+    }
+
+    private isMoneyTrade( assort: ITraderAssort, trade: Item ): boolean
+    {
+
+
+        //There are no trades that are bigger than one item that is a money trade.
+        if ( assort.barter_scheme[ trade._id ][ 0 ].length > 1 )
+        {
+            return false;
+        }
+        for ( const ID of LimitedTraders.moneyIDs )
+        {
+            if ( assort.barter_scheme[ trade._id ][ 0 ][ 0 ]._tpl == ID )
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private loyaltyMixup( traders: any, traderID: string, item: Item )
     {
         const loyalty = traders[ traderID ].assort.loyal_level_items;
 
@@ -210,7 +252,7 @@ class LimitedTraders implements IPostDBLoadMod, IPreAkiLoadMod
         }
     }
 
-    private getCount ( itemDB: any, item: Item ): number
+    private getCount( itemDB: any, item: Item ): number
     {
         const noStockRoll = Math.random();
 
@@ -236,12 +278,12 @@ class LimitedTraders implements IPostDBLoadMod, IPreAkiLoadMod
         return 0;
     }
 
-    private randomCount ( base: number, random: number ): number
+    private randomCount( base: number, random: number ): number
     {
         return ( base + Math.floor( Math.random() * random * 2 ) - random )
     }
 
-    private printColor ( message: string, color: LogTextColor = LogTextColor.GREEN )
+    private printColor( message: string, color: LogTextColor = LogTextColor.GREEN )
     {
         this.logger.logWithColor( message, color );
     }

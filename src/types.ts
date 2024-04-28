@@ -16,4 +16,5 @@ interface entry {
   base: number;
   random: number;
   chanceForNoStock: number;
+  priceAdjustment: number;
 }

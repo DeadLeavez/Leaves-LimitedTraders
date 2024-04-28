@@ -16,7 +16,8 @@
         { 
             "base": 500, //The base count of an item. In this case 300.
             "random": 100, //The variance of the base count. With this being 200, and Base being 300. The total spread is 100-500, or 300+/-200
-            "chanceForNoStock": 0.5 //Chance for there to be none of an item available. Rolled for eached individual item.
+            "chanceForNoStock": 0.5, //Chance for there to be none of an item available. Rolled for eached individual item.
+            "priceAdjustment": 1.35 //Price adjustment. 1.35 means 35% increase in price.
         },
         "543be6564bdc2df4348b4568": //Throw weapon (Grenades)
         {
