@@ -12,3 +12,8 @@ This mod will make traders have a much more limited stock of items available for
 # 1.2.0
 - Added ``chanceForNoStock`` to config. Which adds a chance for an item to not be in stock at all, regardless of rolls.
 - Made the mod track trader updates properly
+
+# 1.2.1
+- Added ``priceAdjustment`` to config. It can be left out and itll default to no change.
+
+Previous config files ARE compatible.
