@@ -203,8 +203,6 @@ class LimitedTraders implements IPostDBLoadMod, IPreAkiLoadMod
 
     private isMoneyTrade( assort: ITraderAssort, trade: Item ): boolean
     {
-
-
         //There are no trades that are bigger than one item that is a money trade.
         if ( assort.barter_scheme[ trade._id ][ 0 ].length > 1 )
         {
