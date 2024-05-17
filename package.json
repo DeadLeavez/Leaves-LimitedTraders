@@ -1,9 +1,9 @@
 {
-    "name": "Limited Traders",
+    "name": "limited_traders",
     "version": "1.2.0",
     "main": "src/mod.js",
     "license": "MIT",
-    "author": "Leaves",
+    "author": "leaves",
     "akiVersion": ">= 3.8.0",
     "scripts": {
         "setup": "npm i",
