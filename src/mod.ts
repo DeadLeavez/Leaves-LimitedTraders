@@ -1,19 +1,19 @@
 import { DependencyContainer } from "tsyringe";
-import { ILogger } from "@spt-aki/models/spt/utils/ILogger";
-import { IPostDBLoadMod } from "@spt-aki/models/external/IPostDBLoadMod";
-import { DatabaseServer } from "@spt-aki/servers/DatabaseServer";
-import { IPreAkiLoadMod } from "@spt-aki/models/external/IPreAkiLoadMod"
-import { OnUpdateModService } from "@spt-aki/services/mod/onUpdate/OnUpdateModService"
+import { ILogger } from "@spt/models/spt/utils/ILogger";
+import { IPostDBLoadMod } from "@spt/models/external/IPostDBLoadMod";
+import { DatabaseServer } from "@spt/servers/DatabaseServer";
+import { IPreSptLoadMod } from "@spt/models/external/IPreSptLoadMod"
+import { OnUpdateModService } from "@spt/services/mod/onUpdate/OnUpdateModService"
 
-import { VFS } from "@spt-aki/utils/VFS";
+import { VFS } from "@spt/utils/VFS";
 import { jsonc } from "jsonc";
 import * as path from "path";
-import { LogTextColor } from "@spt-aki/models/spt/logging/LogTextColor";
-import { Item } from "@spt-aki/models/eft/common/tables/IItem";
-import { ITemplateItem } from "@spt-aki/models/eft/common/tables/ITemplateItem";
-import { IBarterScheme, ITraderAssort } from "@spt-aki/models/eft/common/tables/ITrader";
+import { LogTextColor } from "@spt/models/spt/logging/LogTextColor";
+import { IItem } from "@spt/models/eft/common/tables/IItem";
+import { ITemplateItem } from "@spt/models/eft/common/tables/ITemplateItem";
+import { IBarterScheme, ITraderAssort } from "@spt/models/eft/common/tables/ITrader";
 
-class LimitedTraders implements IPostDBLoadMod, IPreAkiLoadMod
+class LimitedTraders implements IPostDBLoadMod, IPreSptLoadMod
 {
     private logger: ILogger;
     private db: DatabaseServer;
@@ -67,7 +67,7 @@ class LimitedTraders implements IPostDBLoadMod, IPreAkiLoadMod
         return Math.round( unixNow / 1000 );
     }
 
-    public preAkiLoad( container: DependencyContainer ): void
+    public preSptLoad( container: DependencyContainer ): void
     {
 
         this.vfs = container.resolve<VFS>( "VFS" );
@@ -186,7 +186,7 @@ class LimitedTraders implements IPostDBLoadMod, IPreAkiLoadMod
             }
         }
     }
-    private adjustPrice( itemDB: any, item: Item, scheme: IBarterScheme[][], assort: ITraderAssort )
+    private adjustPrice( itemDB: any, item: IItem, scheme: IBarterScheme[][], assort: ITraderAssort )
     {
         const parent = itemDB[ item._tpl ]._parent;
         if ( !this.config.categories[ parent ] || !this.config.categories[ parent ].priceAdjustment )
@@ -201,7 +201,7 @@ class LimitedTraders implements IPostDBLoadMod, IPreAkiLoadMod
         }
     }
 
-    private isMoneyTrade( assort: ITraderAssort, trade: Item ): boolean
+    private isMoneyTrade( assort: ITraderAssort, trade: IItem ): boolean
     {
         //There are no trades that are bigger than one item that is a money trade.
         if ( assort.barter_scheme[ trade._id ][ 0 ].length > 1 )
@@ -218,7 +218,7 @@ class LimitedTraders implements IPostDBLoadMod, IPreAkiLoadMod
         return false;
     }
 
-    private loyaltyMixup( traders: any, traderID: string, item: Item )
+    private loyaltyMixup( traders: any, traderID: string, item: IItem )
     {
         const loyalty = traders[ traderID ].assort.loyal_level_items;
 
@@ -250,7 +250,7 @@ class LimitedTraders implements IPostDBLoadMod, IPreAkiLoadMod
         }
     }
 
-    private getCount( itemDB: any, item: Item ): number
+    private getCount( itemDB: any, item: IItem ): number
     {
         const noStockRoll = Math.random();
 
