@@ -22,3 +22,7 @@ Previous config files ARE compatible.
 
 - Updated to 3.9.0
 - renamed folders and names to follow package.json standards
+
+## 1.3.1
+- Updated to 3.10.0
+- fixed slow degeneration of prices and loyalty levels.

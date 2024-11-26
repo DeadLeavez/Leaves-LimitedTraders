@@ -1,5 +1,4 @@
 {
-    "timeBetweenUpdates": 115, //How often to re-shuffle their inventory. Should be run more often than traders reset.
     "tradersToLimit":  //remove or add traders you want to have adjusted. Probably works for modded traders, but havent tried.
     [
         "5a7c2eca46aef81a7ca2145d", //Mechanic

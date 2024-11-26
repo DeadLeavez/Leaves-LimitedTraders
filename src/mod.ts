@@ -12,11 +12,13 @@ import { LogTextColor } from "@spt/models/spt/logging/LogTextColor";
 import { IItem } from "@spt/models/eft/common/tables/IItem";
 import { ITemplateItem } from "@spt/models/eft/common/tables/ITemplateItem";
 import { IBarterScheme, ITraderAssort } from "@spt/models/eft/common/tables/ITrader";
+import { TraderAssortService } from "@spt/services/TraderAssortService";
 
 class LimitedTraders implements IPostDBLoadMod, IPreSptLoadMod
 {
     private logger: ILogger;
     private db: DatabaseServer;
+    private traderAssortService: TraderAssortService;
 
     //Config
     private config: Config;
@@ -96,6 +98,8 @@ class LimitedTraders implements IPostDBLoadMod, IPreSptLoadMod
         // Get item database from tables
         const itemDB = tables.templates.items;
 
+        this.traderAssortService = container.resolve<TraderAssortService>( "TraderAssortService" );
+
         this.printColor( "[Limited Traders] Limited Traders Starting" );
 
         const traderIDs: string[] = this.config.tradersToLimit;
@@ -156,7 +160,7 @@ class LimitedTraders implements IPostDBLoadMod, IPreSptLoadMod
 
             //Check config categories
             count = this.getCount( itemDB, item );
-            this.adjustPrice( itemDB, item, traders[ traderID ].assort.barter_scheme[ item._id ], traders[ traderID ].assort );
+            this.adjustPrice( itemDB, item, traders[ traderID ].assort.barter_scheme[ item._id ], traders[ traderID ].assort, traderID );
 
             item.upd.StackObjectsCount = count;
 
@@ -186,7 +190,7 @@ class LimitedTraders implements IPostDBLoadMod, IPreSptLoadMod
             }
         }
     }
-    private adjustPrice( itemDB: any, item: IItem, scheme: IBarterScheme[][], assort: ITraderAssort )
+    private adjustPrice( itemDB: any, item: IItem, scheme: IBarterScheme[][], assort: ITraderAssort, traderID:string )
     {
         const parent = itemDB[ item._tpl ]._parent;
         if ( !this.config.categories[ parent ] || !this.config.categories[ parent ].priceAdjustment )
@@ -197,7 +201,10 @@ class LimitedTraders implements IPostDBLoadMod, IPreSptLoadMod
         if ( this.isMoneyTrade( assort, item ) )
         {
             const priceAdjustment = this.config.categories[ parent ].priceAdjustment;
-            scheme[ 0 ][ 0 ].count *= priceAdjustment;
+            //Get pristine price for item
+            
+            const originalPrice = this.traderAssortService.getPristineTraderAssort( traderID ).barter_scheme[ item._id ][ 0 ][ 0 ].count;
+            scheme[ 0 ][ 0 ].count = priceAdjustment * originalPrice;
         }
     }
 
@@ -220,7 +227,9 @@ class LimitedTraders implements IPostDBLoadMod, IPreSptLoadMod
 
     private loyaltyMixup( traders: any, traderID: string, item: IItem )
     {
-        const loyalty = traders[ traderID ].assort.loyal_level_items;
+        let loyalty = traders[ traderID ].assort.loyal_level_items;
+        //Get pristine loyalty for this item.
+        loyalty[ item._id ] = this.traderAssortService.getPristineTraderAssort( traderID ).loyal_level_items[ item._id ];
 
         //Down one
         if ( loyalty[ item._id ] > 1 )
@@ -284,6 +293,15 @@ class LimitedTraders implements IPostDBLoadMod, IPreSptLoadMod
     private printColor( message: string, color: LogTextColor = LogTextColor.GREEN )
     {
         this.logger.logWithColor( message, color );
+    }
+
+    public debugJsonOutput( jsonObject: any, label: string = "" )
+    {
+        if ( label.length > 0 )
+        {
+            this.logger.logWithColor( "[" + label + "]", LogTextColor.GREEN );
+        }
+        this.logger.logWithColor( JSON.stringify( jsonObject, null, 4 ), LogTextColor.MAGENTA );
     }
 }
 
