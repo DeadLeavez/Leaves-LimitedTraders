@@ -13,12 +13,14 @@ import { IItem } from "@spt/models/eft/common/tables/IItem";
 import { ITemplateItem } from "@spt/models/eft/common/tables/ITemplateItem";
 import { IBarterScheme, ITraderAssort } from "@spt/models/eft/common/tables/ITrader";
 import { TraderAssortService } from "@spt/services/TraderAssortService";
+import { RagfairOfferGenerator } from "@spt/generators/RagfairOfferGenerator";
 
 class LimitedTraders implements IPostDBLoadMod, IPreSptLoadMod
 {
     private logger: ILogger;
     private db: DatabaseServer;
     private traderAssortService: TraderAssortService;
+    private ragfairOfferGenerator: RagfairOfferGenerator;
 
     //Config
     private config: Config;
@@ -54,7 +56,7 @@ class LimitedTraders implements IPostDBLoadMod, IPreSptLoadMod
                     this.modifyTrader( this.tradersToUpdate[ traderNum ] );
 
                     this.tradersLastUpdate[ traderNum ] = structuredClone( traders[ this.tradersToUpdate[ traderNum ] ].base.nextResupply );
-                    this.printColor( "[Limited Traders] Updating Trader:" + this.tradersToUpdate[ traderNum ], LogTextColor.BLUE );
+                    this.printColor( `[Limited Traders] Updating Trader:[${ traders[ this.tradersToUpdate[ traderNum ] ].base.nickname }]-[${ this.tradersToUpdate[ traderNum ] }]`, LogTextColor.BLUE );
                 }
             }
             return true;
@@ -99,6 +101,7 @@ class LimitedTraders implements IPostDBLoadMod, IPreSptLoadMod
         const itemDB = tables.templates.items;
 
         this.traderAssortService = container.resolve<TraderAssortService>( "TraderAssortService" );
+        this.ragfairOfferGenerator = container.resolve<RagfairOfferGenerator>( "RagfairOfferGenerator" )
 
         this.printColor( "[Limited Traders] Limited Traders Starting" );
 
@@ -189,8 +192,10 @@ class LimitedTraders implements IPostDBLoadMod, IPreSptLoadMod
                 this.loyaltyMixup( traders, traderID, item );
             }
         }
+
+        this.ragfairOfferGenerator.generateFleaOffersForTrader( traderID );
     }
-    private adjustPrice( itemDB: any, item: IItem, scheme: IBarterScheme[][], assort: ITraderAssort, traderID:string )
+    private adjustPrice( itemDB: any, item: IItem, scheme: IBarterScheme[][], assort: ITraderAssort, traderID: string )
     {
         const parent = itemDB[ item._tpl ]._parent;
         if ( !this.config.categories[ parent ] || !this.config.categories[ parent ].priceAdjustment )
@@ -202,7 +207,7 @@ class LimitedTraders implements IPostDBLoadMod, IPreSptLoadMod
         {
             const priceAdjustment = this.config.categories[ parent ].priceAdjustment;
             //Get pristine price for item
-            
+
             const originalPrice = this.traderAssortService.getPristineTraderAssort( traderID ).barter_scheme[ item._id ][ 0 ][ 0 ].count;
             scheme[ 0 ][ 0 ].count = priceAdjustment * originalPrice;
         }

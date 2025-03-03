@@ -26,3 +26,7 @@ Previous config files ARE compatible.
 ## 1.3.1
 - Updated to 3.10.0
 - fixed slow degeneration of prices and loyalty levels.
+
+## 1.3.2
+- Added nickname to server message
+- Fixed flea not being updated with new prices and limits

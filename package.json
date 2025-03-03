@@ -1,6 +1,6 @@
 {
     "name": "limited_traders",
-    "version": "1.3.1",
+    "version": "1.3.2",
     "main": "src/mod.js",
     "license": "MIT",
     "author": "leaves",
