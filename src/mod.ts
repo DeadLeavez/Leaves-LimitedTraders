@@ -5,7 +5,7 @@ import { DatabaseServer } from "@spt/servers/DatabaseServer";
 import { IPreSptLoadMod } from "@spt/models/external/IPreSptLoadMod"
 import { OnUpdateModService } from "@spt/services/mod/onUpdate/OnUpdateModService"
 
-import { VFS } from "@spt/utils/VFS";
+import { VFS } from "./deps/VFS";
 import { jsonc } from "jsonc";
 import * as path from "path";
 import { LogTextColor } from "@spt/models/spt/logging/LogTextColor";
@@ -74,7 +74,7 @@ class LimitedTraders implements IPostDBLoadMod, IPreSptLoadMod
     public preSptLoad( container: DependencyContainer ): void
     {
 
-        this.vfs = container.resolve<VFS>( "VFS" );
+        this.vfs = new VFS();
         const configFile = path.resolve( __dirname, "../config/config.jsonc" );
         this.config = jsonc.parse( this.vfs.readFile( configFile ) );
 

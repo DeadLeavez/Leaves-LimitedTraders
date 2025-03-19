@@ -30,3 +30,6 @@ Previous config files ARE compatible.
 ## 1.3.2
 - Added nickname to server message
 - Fixed flea not being updated with new prices and limits
+
+## 1.3.3
+- Update to 3.11 (still works on 3.10)
